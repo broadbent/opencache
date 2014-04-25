@@ -30,20 +30,20 @@ class Request:
             if expr == '*':
                 _json = None
                 _json = '{"switch": "' + switch_dpid + '", "name":"' + node_host + ':' + node_port + ':' + expr + ':fetch", "' + switch_dpid + '", "priority":"32767", "ether-type":"2048", "protocol":"6", "src-ip":"' + node_host + '", "dst-port":"80", "actions":"output=normal"}'
-                lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+                print lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
                 _json = None
                 _json = '{"switch": "' + switch_dpid + '", "name":"' + node_host + ':' + node_port + ':' + expr + ':in", "' + switch_dpid + '", "priority":"32767", "ether-type":"2048", "protocol":"6", "dst-port":"80", "actions":"set-dst-ip=' + node_host + ',set-dst-port=' + node_port + ',output=normal"}'
-                lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
-            else:   
-                _json = None 
+                print lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+            else:
+                _json = None
                 _json = '{"switch": "' + switch_dpid + '", "name":"' + node_host + ':' + node_port + ':' + expr + ':out", "vlan-id":"' + vlan_id + '", "priority":"32767", "ether-type":"2048", "protocol":"6", "src-ip":"' + node_host + '", "src-port":"' + node_port + '", "actions":"set-src-ip=' + expr + ',set-src-port=80,output=normal"}'
-                lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+                print lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
                 _json = None
                 _json = '{"switch": "' + switch_dpid + '", "name":"' + node_host + ':' + node_port + ':' + expr + ':fetch", "' + switch_dpid + '", "priority":"32767", "ether-type":"2048", "protocol":"6", "src-ip":"' + node_host + '", "dst-port":"80", "actions":"output=normal"}'
-                lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+                print lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
                 _json = None
                 _json = '{"switch": "' + switch_dpid + '", "name":"' + node_host + ':' + node_port + ':' + expr + ':in", "' + switch_dpid + '", "priority":"32767", "ether-type":"2048", "protocol":"6", "dst-ip":"' + expr + '", "dst-port":"80", "actions":"set-dst-ip=' + node_host + ',set-dst-port=' + node_port + ',output=normal"}'
-                lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+                print lib.do_json_rest_post(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
         except Exception as e:
             self._controller.print_error(TAG, "Could not add redirect with Floodlight controller: " + str(e))
 
@@ -52,12 +52,12 @@ class Request:
         try:
             _json = None
             _json = '{"name":"' + node_host + ':' + node_port + ':' + expr + ':out",}'
-            lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+            print lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
             _json = None
             _json = '{"name":"' + node_host + ':' + node_port + ':' + expr + ':fetch",}'
-            lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+            print lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
             _json = None
             _json = '{"name":"' + node_host + ':' + node_port + ':' + expr + ':in",}'
-            lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
+            print lib.do_json_rest_delete(host=self._config['openflow_host'], port=self._config['openflow_port'], _json=_json, path='/wm/staticflowentrypusher/json')
         except Exception as e:
             self._controller.print_error(TAG, "Could not remove redirect with Floodlight controller: " + str(e))
