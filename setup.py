@@ -13,7 +13,7 @@ conf = dict(
     'opencache.node.server', 'opencache.controller.api', 'opencache.controller.request',
     'opencache.controller.state'],
     scripts=['scripts/opencache'],
-    install_requires=['redis', 'pyzmq', 'configparser'],
+    install_requires=['pymongo', 'pyzmq', 'configparser'],
     url='https://github.com/broadbent/opencache',
     license='Apache License, Version 2.0',
     download_url='https://github.com/broadbent/opencache/archive/0.0.1-dev.zip',
