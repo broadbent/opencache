@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+		<title>OpenCache Console | Management</title>
+	</head>
+	<body>
+		<div id='header'>
+			<div id='title'>
+				<span id='title'><a href="/"><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Console<span></a>
+				<span id='mode'><a class="current" href="/management">Management</a> <span class='oc-red'>|</span> <a href="#">Statistics</a></span>
+			</div>
+			<div id='subtitle'>
+					{% if mode == 'expr' %}
+					<a href="/management">Execute</a> <span class='oc-red'>|</span><a href="/management/node"> Node </a><span class='oc-red'>|</span> <a href="/management/expr" class='current'>Expression</a>
+					{% elif mode == 'node' %}
+					<a href="/management">Execute</a> <span class='oc-red'>|</span><a href="/management/node" class='current'> Node </a><span class='oc-red'>|</span> <a href="/management/expr">Expression</a>
+					{% else %}
+					<a href="/management" class='current'>Execute</a> <span class='oc-red'>|</span><a href="/management/node"> Node </a><span class='oc-red'>|</span> <a href="/management/expr">Expression</a>
+					{% endif %}
+			</div>
+		</div>
+		{% if node_list %}
+		<div>
+			{% if expr %}
+				<span class='boxtitle'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Nodes with Expression: <em>{{expr}}</em></span>
+			{% else %}
+				<span class='boxtitle'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Nodes</span>
+			{% endif %}
+			<table id='table'>
+			{% for node in node_list %}
+				<tr class='list-item'>
+					<td>
+						{% if expr and node %}
+							{{node}}
+						{% else %}
+							<a href="/management/node/{{node}}">{{node}}</a>
+						{% endif %}
+					</td>
+				<form action="/management/action" method="GET">
+						<td class='list-control'>
+							{% if expr and node %}
+								<input type="hidden" name="expr" value="{{expr}}">
+								<input type="hidden" name="node" value="{{node}}">
+								<input type="hidden" name="previous" value="expr/{{expr}}">
+							{% else %}
+								<input type="hidden" name="expr" value="*">
+								<input type="hidden" name="node" value="{{node}}">
+								<input type="hidden" name="previous" value="node">
+							{% endif %}
+							<button title='start' type="submit" name="method" value="start"><img src="{{ url_for('static', filename='start.png') }}" alt="start"></button><button title='stop' type="submit" name="method" value="stop"><img src="{{ url_for('static', filename='stop.png') }}" alt="stop"></button><button title='pause' type="submit" name="method" value="pause"><img src="{{ url_for('static', filename='pause.png') }}" alt="pause"></button><button title='refresh' type="submit" name="method" value="refresh"><img src="{{ url_for('static', filename='refresh.png') }}" alt="refresh"></button><button title='stat' type="submit" name="method" value="stat"><img src="{{ url_for('static', filename='info.png') }}" alt="stat"></button><button title='seed' type="submit" name="method" value="seed"><img src="{{ url_for('static', filename='seed.png') }}" alt="seed"></button><button title='fetch' type="submit" name="method" value="fetch"><img src="{{ url_for('static', filename='fetch.png') }}" alt="fetch"></button>
+						</td>
+					</form>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+		{% elif expr_list %}
+		<div>
+			{% if node_id %}
+				<span class='boxtitle'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Expressions on Node: <em>{{node_id}}</em></span>
+			{% else %}
+				<span class='boxtitle'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Expressions</span>
+			{% endif %}
+			<table>
+			{% for expr in expr_list %}
+				<tr class='list-item'>
+					<td>
+						{% if expr and node_id %}
+							{{expr}}
+						{% else %}
+							<a href="/management/expr/{{expr}}">{{expr}}</a>
+						{% endif %}
+					</td>
+					<form action="/management/action" method="GET">
+						<td class='list-control'>
+							{% if expr and node_id %}
+								<input type="hidden" name="expr" value="{{expr}}">
+								<input type="hidden" name="node" value="{{node_id}}">
+								<input type="hidden" name="previous" value="node/{{node_id}}">
+							{% else %}
+								<input type="hidden" name="expr" value="{{expr}}">
+								<input type="hidden" name="node" value="*">
+								<input type="hidden" name="previous" value="expr">
+							{% endif %}
+							<button title='start' type="submit" name="method" value="start"><img src="{{ url_for('static', filename='start.png') }}" alt="start"></button><button title='stop' type="submit" name="method" value="stop"><img src="{{ url_for('static', filename='stop.png') }}" alt="stop"></button><button title='pause' type="submit" name="method" value="pause"><img src="{{ url_for('static', filename='pause.png') }}" alt="pause"></button><button title='refresh' type="submit" name="method" value="refresh"><img src="{{ url_for('static', filename='refresh.png') }}" alt="refresh"></button><button title='stat' type="submit" name="method" value="stat"><img src="{{ url_for('static', filename='info.png') }}" alt="stat"></button><button title='seed' type="submit" name="method" value="seed"><img src="{{ url_for('static', filename='seed.png') }}" alt="seed"></button><button title='fetch' type="submit" name="method" value="fetch"><img src="{{ url_for('static', filename='fetch.png') }}" alt="fetch"></button>
+						</td>
+					</form>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+		{% else %}
+		<div>
+			<span class='boxtitle'>Execute <span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Command</span><span class='note'> †</span>
+			<div>
+				<form action="/management/action" method="GET">
+				<table>
+					<tr>
+						<td>Expression(s):</td>
+						<td><input type="text" value='*' name="expression"></td>
+						<td class='note'>‡</td>
+					</tr>
+					<tr>
+						<td>Node(s):</td>
+						<td><input type="text" value='*' name="node"></td>
+						<td class='note'>‡</td>
+					</tr>
+					<tr>
+				</table>
+				<div class='buttons'>
+					<button title='start' type="submit" name="method" value="start"><img src="{{ url_for('static', filename='start.png') }}" alt="start"></button><button title='stop' type="submit" name="method" value="stop"><img src="{{ url_for('static', filename='stop.png') }}" alt="stop"></button><button title='pause' type="submit" name="method" value="pause"><img src="{{ url_for('static', filename='pause.png') }}" alt="pause"></button><button title='refresh' type="submit" name="method" value="refresh"><img src="{{ url_for('static', filename='refresh.png') }}" alt="refresh"></button><button title='stat' type="submit" name="method" value="stat"><img src="{{ url_for('static', filename='info.png') }}" alt="stat"></button><button title='seed' type="submit" name="method" value="seed"><img src="{{ url_for('static', filename='seed.png') }}" alt="seed"></button><button title='fetch' type="submit" name="method" value="fetch"><img src="{{ url_for('static', filename='fetch.png') }}" alt="fetch"></button><span class='note'>§</span>
+				</div>
+				<div class='subtext'>
+					<span class='note'>† </span> Directly executing an <span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Command can be a powerful tool. However, it can also significantly change an entire <span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> deployment, so use with caution.
+				</div>
+				<div class='subtext'>
+					<span class='note'>‡ </span> To execute multiple values in one command, separate each value with a pipe <span class='tinybox'>|</span>. To define all nodes or expressions, use an astrerix <span class='tinybox'>*</span>; this is the default if no value is given.
+				</div>
+				<div class='subtext'>
+					<span class='note'>§ </span> For more details on the functionality of each method, please see the <a href='http://rtfd.opencache.io'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> documentation.</a>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+	</body>
+	<footer>
+		<div id='copyright'>
+			&copy; 2014 <a href="mailto:matt@matthewbroadbent.net">Matthew Broadbent</a>; licensed under the <a href='http:/www.apache.org/licenses/LICENSE-2.0'>Apache License, Version 2.0.</a>
+		</div>
+	</footer>
+</html>

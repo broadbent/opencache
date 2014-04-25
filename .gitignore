@@ -37,7 +37,6 @@ nosetests.xml
 # Personal
 MANIFEST
 .DS_Store
-console/
 redis-py/
 redis/
 prototype/

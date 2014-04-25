@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <script src="{{ url_for('static', filename='flot/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='flot/jquery.flot.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='flot/jquery.flot.time.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='graphs.js') }}"></script>
+		<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+		<title>OpenCache Console | Statistics</title>
+	</head>
+	<body>
+		<div id='header'>
+			<div id='title'>
+				<span id='title'><a href="/"><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Console<span></a>
+				<span id='mode'><a href="/management">Management</a> <span class='oc-red'>|</span> <a class="current" href="#">Statistics</a></span>
+			</div>
+		</div>
+        <div>
+            <span class='boxtitle'><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Statistics for Node: <em>{{node_id}}</em> with Expression: <em>{{expr}}</em></span></br>
+
+        <script>
+            req_url = "/data?expr={{expr}}&node={{node_id}}"
+        </script>
+        <div id="count">
+            Event Count
+            <div id="placeholder-count"></div>
+        </div>
+        <div id="size">
+            Event Size
+            <div id="placeholder-size"></div>
+        </div>
+                </div>
+	</body>
+	<footer>
+		<div id='copyright'>
+			&copy; 2014 <a href="mailto:matt@matthewbroadbent.net">Matthew Broadbent</a>; licensed under the <a href='http://www.apache.org/licenses/LICENSE-2.0'>Apache License, Version 2.0.</a>
+		</div>
+	</footer>
+</html>

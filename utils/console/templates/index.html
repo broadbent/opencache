@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+		<title>OpenCache Console: Overview</title>
+	</head>
+	<body>
+		<div id='header'>
+			<span id='title'><a href="/"><span class='oc-red'>Open</span><span class='oc-gray'>Cache</span> Console<span></a>
+			<span id='mode'><a href="/" class="current" >Overview</a> <span class='oc-red'>|</span> <a href="/management">Management</a> <span class='oc-red'>|</span> <a href="/statistics">Statistics</a></span>
+		</div>
+
+		<div class='box'>
+			<div class='boxtitle'><span style="color:#942930;">Open</span><span style="color:#3F4142;">Cache</span> Controller</div>
+			IP Address: {{ controller.ip }}</br>
+			Port: {{ controller.port }}</br>
+			Uptime: {{ controller.uptime }}</br>
+		</div>
+
+		<div class='box'>
+			<div class='boxtitle'><span style="color:#942930;">Open</span><span style="color:#3F4142;">Cache</span> Nodes</div>
+			Connected Nodes: {{ node.count }}</br>
+			Total Objects Served: {{ node.object }}</br>
+			Total Bytes Served: {{ node.byte }}</br>
+		</div>
+
+	</body>
+	<footer>
+		<div id='copyright'>
+			&copy; 2014 <a href="mailto:matt@matthewbroadbent.net">Matthew Broadbent</a>; licensed under the <a href='http://www.apache.org/licenses/LICENSE-2.0'>Apache License, Version 2.0.</a>
+		</div>
+	</footer>
+</html>
