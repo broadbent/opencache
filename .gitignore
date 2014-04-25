@@ -47,4 +47,3 @@ media/
 www/
 *.log
 cache/
-http-client.py
