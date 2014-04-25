@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.controller.request.opencachefloodlight &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for opencache.controller.request.opencachefloodlight</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python2.7</span>
+
+<span class="sd">&quot;&quot;&quot;opencachefloodlight.py - Sends JSON-RPC commands to the Floodlight controller.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">opencache.lib.opencachelib</span> <span class="kn">as</span> <span class="nn">lib</span>
+
+<span class="n">TAG</span> <span class="o">=</span> <span class="s">&#39;request&#39;</span>
+
+<div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../../../opencache.controller.request.html#opencache.controller.request.opencachefloodlight.Request">[docs]</a><span class="k">class</span> <span class="nc">Request</span><span class="p">:</span>
+
+    <span class="n">_config</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_controller</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise redirection instance with useful objects.</span>
+
+<span class="sd">        Instantiated controller and configuration objects are passed for use within this instance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
+
+<div class="viewcode-block" id="Request.stop"><a class="viewcode-back" href="../../../../opencache.controller.request.html#opencache.controller.request.opencachefloodlight.Request.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop redirection object.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="Request.add_redirect"><a class="viewcode-back" href="../../../../opencache.controller.request.html#opencache.controller.request.opencachefloodlight.Request.add_redirect">[docs]</a>    <span class="k">def</span> <span class="nf">add_redirect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_host</span><span class="p">,</span> <span class="n">node_port</span><span class="p">,</span> <span class="n">openflow_host</span><span class="p">,</span> <span class="n">openflow_port</span><span class="p">,</span> <span class="n">switch_dpid</span><span class="p">,</span> <span class="n">vlan_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a redirect for content requests matching given expression to given node.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">expr</span> <span class="o">==</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;switch&quot;: &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:fetch&quot;, &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;priority&quot;:&quot;32767&quot;, &quot;ether-type&quot;:&quot;2048&quot;, &quot;protocol&quot;:&quot;6&quot;, &quot;src-ip&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;dst-port&quot;:&quot;80&quot;, &quot;actions&quot;:&quot;output=normal&quot;}&#39;</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;switch&quot;: &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:in&quot;, &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;priority&quot;:&quot;32767&quot;, &quot;ether-type&quot;:&quot;2048&quot;, &quot;protocol&quot;:&quot;6&quot;, &quot;dst-port&quot;:&quot;80&quot;, &quot;actions&quot;:&quot;set-dst-ip=&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;,set-dst-port=&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;,output=normal&quot;}&#39;</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>   
+                <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span> 
+                <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;switch&quot;: &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:out&quot;, &quot;vlan-id&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">vlan_id</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;priority&quot;:&quot;32767&quot;, &quot;ether-type&quot;:&quot;2048&quot;, &quot;protocol&quot;:&quot;6&quot;, &quot;src-ip&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;src-port&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;actions&quot;:&quot;set-src-ip=&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;,set-src-port=80,output=normal&quot;}&#39;</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;switch&quot;: &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:fetch&quot;, &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;priority&quot;:&quot;32767&quot;, &quot;ether-type&quot;:&quot;2048&quot;, &quot;protocol&quot;:&quot;6&quot;, &quot;src-ip&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;dst-port&quot;:&quot;80&quot;, &quot;actions&quot;:&quot;output=normal&quot;}&#39;</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;switch&quot;: &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:in&quot;, &quot;&#39;</span> <span class="o">+</span> <span class="n">switch_dpid</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;priority&quot;:&quot;32767&quot;, &quot;ether-type&quot;:&quot;2048&quot;, &quot;protocol&quot;:&quot;6&quot;, &quot;dst-ip&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;&quot;, &quot;dst-port&quot;:&quot;80&quot;, &quot;actions&quot;:&quot;set-dst-ip=&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;,set-dst-port=&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;,output=normal&quot;}&#39;</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&quot;Could not add redirect with Floodlight controller: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Request.remove_redirect"><a class="viewcode-back" href="../../../../opencache.controller.request.html#opencache.controller.request.opencachefloodlight.Request.remove_redirect">[docs]</a>    <span class="k">def</span> <span class="nf">remove_redirect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_host</span><span class="p">,</span> <span class="n">node_port</span><span class="p">,</span> <span class="n">openflow_host</span><span class="p">,</span> <span class="n">openflow_port</span><span class="p">,</span> <span class="n">switch_dpid</span><span class="p">,</span> <span class="n">vlan_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a redirect for content requests matching given expression to given node.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:out&quot;,}&#39;</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_delete</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:fetch&quot;,}&#39;</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_delete</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">_json</span> <span class="o">=</span> <span class="s">&#39;{&quot;name&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">node_host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">node_port</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s">&#39;:in&quot;,}&#39;</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">do_json_rest_delete</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_host&#39;</span><span class="p">],</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;openflow_port&#39;</span><span class="p">],</span> <span class="n">_json</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/wm/staticflowentrypusher/json&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&quot;Could not remove redirect with Floodlight controller: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

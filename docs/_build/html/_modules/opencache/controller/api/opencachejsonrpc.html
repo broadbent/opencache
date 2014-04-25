@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.controller.api.opencachejsonrpc &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for opencache.controller.api.opencachejsonrpc</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python2.7     </span>
+
+<span class="sd">&quot;&quot;&quot;opencachejson.py - Implements a JSON-RPC interface for communicating with the controller. &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">BaseHTTPServer</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">SocketServer</span>
+
+<span class="kn">import</span> <span class="nn">opencache.lib.opencachelib</span> <span class="kn">as</span> <span class="nn">lib</span>
+
+<span class="n">TAG</span> <span class="o">=</span> <span class="s">&#39;api&#39;</span>
+
+<div class="viewcode-block" id="Api"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.Api">[docs]</a><span class="k">class</span> <span class="nc">Api</span><span class="p">:</span>
+
+    <span class="n">_server_proc</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_server</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_config</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_controller</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise API instance with useful objects.</span>
+
+<span class="sd">        Instantiated controller and configuration objects are passed for use within this instance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">HandlerClass</span> <span class="o">=</span> <span class="n">JSONHandler</span>
+        <span class="n">HandlerClass</span><span class="o">.</span><span class="n">protocol_version</span> <span class="o">=</span> <span class="s">&quot;HTTP/1.0&quot;</span>
+        <span class="n">HandlerClass</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">ThreadedHTTPServer</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;controller_host&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;controller_port&#39;</span><span class="p">])),</span> <span class="n">HandlerClass</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server_proc</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_server</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server_proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Api.stop"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.Api.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop JSON server.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">server_close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_server_proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+    <span class="k">def</span> <span class="nf">_create_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start JSON Server.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_info</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&quot;JSON-RPC API starting at </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;controller_host&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;controller_port&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ThreadedHTTPServer"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer">[docs]</a><span class="k">class</span> <span class="nc">ThreadedHTTPServer</span><span class="p">(</span><span class="n">SocketServer</span><span class="o">.</span><span class="n">ThreadingMixIn</span><span class="p">,</span> <span class="n">BaseHTTPServer</span><span class="o">.</span><span class="n">HTTPServer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a threaded HTTP server.&quot;&quot;&quot;</span>
+    <span class="n">allow_reuse_address</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">daemon_threads</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="JSONHandler"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.JSONHandler">[docs]</a><span class="k">class</span> <span class="nc">JSONHandler</span><span class="p">(</span><span class="n">BaseHTTPServer</span><span class="o">.</span><span class="n">BaseHTTPRequestHandler</span><span class="p">):</span>
+    
+    <span class="k">class</span> <span class="nc">_RemoteProcedureCall</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Simple object used to store RPC information.&quot;&quot;&quot;</span>
+        
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialise object with deault values.&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="JSONHandler.log_message"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.JSONHandler.log_message">[docs]</a>    <span class="k">def</span> <span class="nf">log_message</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">format</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Ignore log messages.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="JSONHandler.do_GET"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.JSONHandler.do_GET">[docs]</a>    <span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Ignore GET messages.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+    <span class="k">def</span> <span class="nf">_validate_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpc</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rpc</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s">&quot;method&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span> <span class="ow">or</span> <span class="s">&quot;params&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span> <span class="ow">or</span> <span class="s">&quot;jsonrpc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rpc</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="s">&quot;method&quot;</span><span class="p">])</span>
+                <span class="n">rpc</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="s">&quot;params&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">rpc</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">lib</span><span class="o">.</span><span class="n">RemoteProcedureCallError</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s">&#39;The JSON sent is not a valid Request object.&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s">&#39;-32600&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate_method_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpc</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rpc</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;hello&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&quot;host&quot;</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">params</span> <span class="ow">and</span> <span class="s">&quot;port&quot;</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                    <span class="n">rpc</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;host&quot;</span><span class="p">])</span>
+                    <span class="n">rpc</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;port&quot;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="k">elif</span> <span class="n">rpc</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;keep_alive&quot;</span> <span class="ow">or</span> <span class="n">rpc</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&quot;goodbye&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&quot;node-id&quot;</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                    <span class="n">rpc</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;node-id&quot;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&quot;node-id&quot;</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                    <span class="n">rpc</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;node-id&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="s">&quot;expr&quot;</span> <span class="ow">in</span> <span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                    <span class="n">rpc</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rpc</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&quot;expr&quot;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">rpc</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">lib</span><span class="o">.</span><span class="n">RemoteProcedureCallError</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s">&#39;Invalid method parameter(s).&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s">&#39;-32602&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_call_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpc</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="n">rpc</span><span class="o">.</span><span class="n">method</span><span class="p">)(</span><span class="n">rpc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">lib</span><span class="o">.</span><span class="n">RemoteProcedureCallError</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Controller has no method named: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">rpc</span><span class="o">.</span><span class="n">method</span><span class="p">),</span> <span class="n">code</span><span class="o">=</span><span class="s">&#39;-32601&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="JSONHandler.do_POST"><a class="viewcode-back" href="../../../../opencache.controller.api.html#opencache.controller.api.opencachejsonrpc.JSONHandler.do_POST">[docs]</a>    <span class="k">def</span> <span class="nf">do_POST</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle POST message containing JSON request.&quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="s">&#39;content-type&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="s">&#39;application/x-www-form-urlencoded&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">content_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="s">&#39;content-length&#39;</span><span class="p">))</span>
+                <span class="n">post_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">content_length</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">print_debug</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&#39;post body: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_body</span><span class="p">))</span>
+                <span class="n">rpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RemoteProcedureCall</span><span class="p">()</span>
+                <span class="n">rpc</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">post_body</span><span class="p">)</span>
+                <span class="n">rpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_request</span><span class="p">(</span><span class="n">rpc</span><span class="p">)</span>
+                <span class="n">rpc</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">rpc</span><span class="o">.</span><span class="n">request</span><span class="p">[</span><span class="s">&#39;params&#39;</span><span class="p">]</span>
+                <span class="n">rpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_method_params</span><span class="p">(</span><span class="n">rpc</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_method</span><span class="p">(</span><span class="n">rpc</span><span class="p">)</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">send_json_rpc_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpc</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">lib</span><span class="o">.</span><span class="n">RemoteProcedureCallError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+                <span class="n">lib</span><span class="o">.</span><span class="n">send_json_rpc_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpc</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">exception</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">exception</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

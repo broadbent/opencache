@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.controller.api package &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="opencache.controller package" href="opencache.controller.html" />
+    <link rel="next" title="opencache.controller.request package" href="opencache.controller.request.html" />
+    <link rel="prev" title="opencache.controller package" href="opencache.controller.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.request.html" title="opencache.controller.request package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.html" title="opencache.controller package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" >opencache package</a> &raquo;</li>
+          <li><a href="opencache.controller.html" accesskey="U">opencache.controller package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="opencache-controller-api-package">
+<h1>opencache.controller.api package<a class="headerlink" href="#opencache-controller-api-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-opencache.controller.api.opencachejsonrpc">
+<span id="opencache-controller-api-opencachejsonrpc-module"></span><h2>opencache.controller.api.opencachejsonrpc module<a class="headerlink" href="#module-opencache.controller.api.opencachejsonrpc" title="Permalink to this headline">¶</a></h2>
+<p>opencachejson.py - Implements a JSON-RPC interface for communicating with the controller.</p>
+<dl class="class">
+<dt id="opencache.controller.api.opencachejsonrpc.Api">
+<em class="property">class </em><tt class="descclassname">opencache.controller.api.opencachejsonrpc.</tt><tt class="descname">Api</tt><big>(</big><em>controller</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#Api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.Api" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="opencache.controller.api.opencachejsonrpc.Api.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#Api.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.Api.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop JSON server.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="opencache.controller.api.opencachejsonrpc.JSONHandler">
+<em class="property">class </em><tt class="descclassname">opencache.controller.api.opencachejsonrpc.</tt><tt class="descname">JSONHandler</tt><big>(</big><em>request</em>, <em>client_address</em>, <em>server</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#JSONHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.JSONHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">BaseHTTPServer.BaseHTTPRequestHandler</span></tt></p>
+<dl class="method">
+<dt id="opencache.controller.api.opencachejsonrpc.JSONHandler.do_GET">
+<tt class="descname">do_GET</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#JSONHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.JSONHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore GET messages.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.api.opencachejsonrpc.JSONHandler.do_POST">
+<tt class="descname">do_POST</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#JSONHandler.do_POST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.JSONHandler.do_POST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle POST message containing JSON request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.api.opencachejsonrpc.JSONHandler.log_message">
+<tt class="descname">log_message</tt><big>(</big><em>format</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#JSONHandler.log_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.JSONHandler.log_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore log messages.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer">
+<em class="property">class </em><tt class="descclassname">opencache.controller.api.opencachejsonrpc.</tt><tt class="descname">ThreadedHTTPServer</tt><big>(</big><em>server_address</em>, <em>RequestHandlerClass</em>, <em>bind_and_activate=True</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/api/opencachejsonrpc.html#ThreadedHTTPServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">SocketServer.ThreadingMixIn</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">BaseHTTPServer.HTTPServer</span></tt></p>
+<p>Create a threaded HTTP server.</p>
+<dl class="attribute">
+<dt id="opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer.allow_reuse_address">
+<tt class="descname">allow_reuse_address</tt><em class="property"> = True</em><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer.allow_reuse_address" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer.daemon_threads">
+<tt class="descname">daemon_threads</tt><em class="property"> = True</em><a class="headerlink" href="#opencache.controller.api.opencachejsonrpc.ThreadedHTTPServer.daemon_threads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-opencache.controller.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-opencache.controller.api" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">opencache.controller.api package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-opencache.controller.api.opencachejsonrpc">opencache.controller.api.opencachejsonrpc module</a></li>
+<li><a class="reference internal" href="#module-opencache.controller.api">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="opencache.controller.html"
+                        title="previous chapter">opencache.controller package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="opencache.controller.request.html"
+                        title="next chapter">opencache.controller.request package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/opencache.controller.api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.request.html" title="opencache.controller.request package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.html" title="opencache.controller package"
+             >previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" >opencache package</a> &raquo;</li>
+          <li><a href="opencache.controller.html" >opencache.controller package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

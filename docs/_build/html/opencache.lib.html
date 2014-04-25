@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.lib package &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="opencache package" href="opencache.html" />
+    <link rel="next" title="opencache.node package" href="opencache.node.html" />
+    <link rel="prev" title="opencache.controller.state package" href="opencache.controller.state.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.node.html" title="opencache.node package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.state.html" title="opencache.controller.state package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" accesskey="U">opencache package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="opencache-lib-package">
+<h1>opencache.lib package<a class="headerlink" href="#opencache-lib-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-opencache.lib.opencachelib">
+<span id="opencache-lib-opencachelib-module"></span><h2>opencache.lib.opencachelib module<a class="headerlink" href="#module-opencache.lib.opencachelib" title="Permalink to this headline">¶</a></h2>
+<p>opencachelib.py: Core OpenCache functionality shared between controller and node.</p>
+<dl class="exception">
+<dt id="opencache.lib.opencachelib.RemoteProcedureCallError">
+<em class="property">exception </em><tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">RemoteProcedureCallError</tt><big>(</big><em>data</em>, <em>code</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#RemoteProcedureCallError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.RemoteProcedureCallError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.create_directory">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">create_directory</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#create_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.create_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new directory if it doesn&#8217;t exist.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.delete_directory">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">delete_directory</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#delete_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.delete_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removed an existing directory used for storing cached content specific to this HTTP server&#8217;s expression.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.do_json_post">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">do_json_post</tt><big>(</big><em>host</em>, <em>port</em>, <em>post_data</em>, <em>path=None</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#do_json_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.do_json_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a JSON call to given destination.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.do_json_rest_delete">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">do_json_rest_delete</tt><big>(</big><em>host</em>, <em>port</em>, <em>_json</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#do_json_rest_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.do_json_rest_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format JSON request as REST with HTTP DELETE.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.do_json_rest_post">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">do_json_rest_post</tt><big>(</big><em>host</em>, <em>port</em>, <em>_json</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#do_json_rest_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.do_json_rest_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format JSON request as REST with HTTP POST.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.do_json_rpc_post">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">do_json_rpc_post</tt><big>(</big><em>_id</em>, <em>method</em>, <em>host</em>, <em>port</em>, <em>_input=None</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#do_json_rpc_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.do_json_rpc_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format JSON request as JSON-RPC with HTTP POST.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.expr_split">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">expr_split</tt><big>(</big><em>expr</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#expr_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.expr_split" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.load_config">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">load_config</tt><big>(</big><em>config</em>, <em>parser</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#load_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.load_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load configuration settings from the configuration file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.log_debug">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">log_debug</tt><big>(</big><em>tag</em>, <em>string</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#log_debug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.log_debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a formatted error message if verbosity level permits.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.log_error">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">log_error</tt><big>(</big><em>tag</em>, <em>string</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#log_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.log_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a formatted error message if verbosity level permits.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.log_info">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">log_info</tt><big>(</big><em>tag</em>, <em>string</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#log_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.log_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a formatted information message if verbosity level permits.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.log_warn">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">log_warn</tt><big>(</big><em>tag</em>, <em>string</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#log_warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.log_warn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a formatted warning message if verbosity level permits.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.send_json_rpc_error">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">send_json_rpc_error</tt><big>(</big><em>JSONHandler</em>, <em>request_id</em>, <em>code</em>, <em>data=None</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#send_json_rpc_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.send_json_rpc_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send JSON error message in response to failed call.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.send_json_rpc_result">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">send_json_rpc_result</tt><big>(</big><em>JSONHandler</em>, <em>request_id</em>, <em>result</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#send_json_rpc_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.send_json_rpc_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send JSON result message in response to successful call.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="opencache.lib.opencachelib.setup_logger">
+<tt class="descclassname">opencache.lib.opencachelib.</tt><tt class="descname">setup_logger</tt><big>(</big><em>log_path</em>, <em>name</em>, <em>verbosity</em><big>)</big><a class="reference internal" href="_modules/opencache/lib/opencachelib.html#setup_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.lib.opencachelib.setup_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup logging functionality to both console and a rotating log file.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-opencache.lib">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-opencache.lib" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">opencache.lib package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-opencache.lib.opencachelib">opencache.lib.opencachelib module</a></li>
+<li><a class="reference internal" href="#module-opencache.lib">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="opencache.controller.state.html"
+                        title="previous chapter">opencache.controller.state package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="opencache.node.html"
+                        title="next chapter">opencache.node package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/opencache.lib.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.node.html" title="opencache.node package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.state.html" title="opencache.controller.state package"
+             >previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" >opencache package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

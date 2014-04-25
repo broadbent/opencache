@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.controller.state package &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="opencache.controller package" href="opencache.controller.html" />
+    <link rel="next" title="opencache.lib package" href="opencache.lib.html" />
+    <link rel="prev" title="opencache.controller.request package" href="opencache.controller.request.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.lib.html" title="opencache.lib package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.request.html" title="opencache.controller.request package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" >opencache package</a> &raquo;</li>
+          <li><a href="opencache.controller.html" accesskey="U">opencache.controller package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="opencache-controller-state-package">
+<h1>opencache.controller.state package<a class="headerlink" href="#opencache-controller-state-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="opencache-controller-state-opencachemongodb-module">
+<h2>opencache.controller.state.opencachemongodb module<a class="headerlink" href="#opencache-controller-state-opencachemongodb-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-opencache.controller.state.opencacheredis">
+<span id="opencache-controller-state-opencacheredis-module"></span><h2>opencache.controller.state.opencacheredis module<a class="headerlink" href="#module-opencache.controller.state.opencacheredis" title="Permalink to this headline">¶</a></h2>
+<p>opencacheredis.py - Manages the state of the controller using a Redis database.</p>
+<dl class="class">
+<dt id="opencache.controller.state.opencacheredis.State">
+<em class="property">class </em><tt class="descclassname">opencache.controller.state.opencacheredis.</tt><tt class="descname">State</tt><big>(</big><em>controller</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.add_node">
+<tt class="descname">add_node</tt><big>(</big><em>host</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.add_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new node to the controller.</p>
+<p>Add a new node to the controller with the given details (hostname and port numbers). Set timeout according 
+to configuration. Return new node ID.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.add_node_expression">
+<tt class="descname">add_node_expression</tt><big>(</big><em>expr</em>, <em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.add_node_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.add_node_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a given node to a given expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.add_stat">
+<tt class="descname">add_stat</tt><big>(</big><em>expr</em>, <em>node_id</em>, <em>status</em>, <em>avg_load</em>, <em>cache_miss</em>, <em>cache_miss_size</em>, <em>cache_hit</em>, <em>cache_hit_size</em>, <em>cache_object</em>, <em>cache_object_size</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.add_stat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.add_stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a stat response to the database.</p>
+<p>Also, update a node as we have seen a periodic response from it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.get_expression">
+<tt class="descname">get_expression</tt><big>(</big><em>expr</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.get_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.get_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find nodes that currently have given expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.get_node_details">
+<tt class="descname">get_node_details</tt><big>(</big><em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.get_node_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.get_node_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a node&#8217;s ID, return it&#8217;s hostname and port number.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.get_stat">
+<tt class="descname">get_stat</tt><big>(</big><em>expr</em>, <em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.get_stat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.get_stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stats relating to a specific cache instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.increment_call_id">
+<tt class="descname">increment_call_id</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.increment_call_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.increment_call_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment call ID number, and return next available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.list_nodes">
+<tt class="descname">list_nodes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.list_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.list_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all nodes currently connected to the controller (or not timed out yet).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.remove_expression">
+<tt class="descname">remove_expression</tt><big>(</big><em>expr</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.remove_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.remove_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Completely remove an expression from the controller.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.remove_node">
+<tt class="descname">remove_node</tt><big>(</big><em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.remove_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a node from the controller.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.remove_node_expression">
+<tt class="descname">remove_node_expression</tt><big>(</big><em>expr</em>, <em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.remove_node_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.remove_node_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a given node from a given expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop state object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="opencache.controller.state.opencacheredis.State.update_node">
+<tt class="descname">update_node</tt><big>(</big><em>node_id</em><big>)</big><a class="reference internal" href="_modules/opencache/controller/state/opencacheredis.html#State.update_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#opencache.controller.state.opencacheredis.State.update_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a node in the controller.</p>
+<p>Refresh timeout on for given node ID. Increment the number of times the controller has seen this node.
+If the node has not been seen before, reset the node (which will generate a new &#8216;hello&#8217; message).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-opencache.controller.state">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-opencache.controller.state" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">opencache.controller.state package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#opencache-controller-state-opencachemongodb-module">opencache.controller.state.opencachemongodb module</a></li>
+<li><a class="reference internal" href="#module-opencache.controller.state.opencacheredis">opencache.controller.state.opencacheredis module</a></li>
+<li><a class="reference internal" href="#module-opencache.controller.state">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="opencache.controller.request.html"
+                        title="previous chapter">opencache.controller.request package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="opencache.lib.html"
+                        title="next chapter">opencache.lib package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/opencache.controller.state.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="opencache.lib.html" title="opencache.lib package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="opencache.controller.request.html" title="opencache.controller.request package"
+             >previous</a> |</li>
+        <li><a href="index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="opencache.html" >opencache package</a> &raquo;</li>
+          <li><a href="opencache.controller.html" >opencache.controller package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

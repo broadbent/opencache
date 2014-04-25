@@ -1,0 +1,3 @@
+include setup.py
+include scripts/opencache
+recursive-include opencache *.py

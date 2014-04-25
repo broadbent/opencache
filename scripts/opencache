@@ -1,0 +1,27 @@
+#!/usr/bin/env python2.7
+
+"""opencache: Simple script used to execute either the OpenCache controller or node."""
+
+import opencache.controller.opencachecontroller as controller
+import opencache.node.opencachenode as node
+import optparse
+import os
+
+parser = optparse.OptionParser()
+parser.add_option("--config", dest="config",
+    help="location of configuration file to load")
+parser.add_option("-c", "--controller", dest="controller", action="store_true",
+    help="start the OpenCache controller")
+parser.add_option("-n", "--node", dest="node", action="store_true",
+    help="start the OpenCache node")
+(options, args) = parser.parse_args()
+if options.config == None:
+	print "[ERROR] Please specify the path to a configuration file."
+	if options.node == None or options.controller == None:
+		print "[ERROR] Please specify a mode."
+	parser.print_help()
+	os._exit(3)
+if options.node:
+    _node = node.Node(options.config)
+elif options.controller:
+    _controller = controller.Controller(options.config)

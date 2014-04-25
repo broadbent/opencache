@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.controller.state.opencacheredis &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for opencache.controller.state.opencacheredis</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python2.7</span>
+
+<span class="sd">&quot;&quot;&quot;opencacheredis.py - Manages the state of the controller using a Redis database.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">redis</span>
+
+<span class="n">TAG</span> <span class="o">=</span> <span class="s">&#39;state&#39;</span>
+
+<div class="viewcode-block" id="State"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State">[docs]</a><span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+
+    <span class="k">class</span> <span class="nc">_Node</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Object representing node details.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Initialise node with sensible default details.&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">class</span> <span class="nc">_Stat</span><span class="p">():</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_miss</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_miss_size</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_hit</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_hit_size</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_object</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_object_size</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">_database</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_config</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_controller</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise state instance with useful objects.</span>
+
+<span class="sd">        Instantiated controller and configuration objects are passed for use within this instance. </span>
+<span class="sd">        Try connecting to the database. Continue to do so until database information is returned </span>
+<span class="sd">        (and the connection is therefore successful).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">database_test</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">database_test</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_database</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;database_host&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;database_port&#39;</span><span class="p">]),</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">database_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_warn</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&quot;Could not connect to redis database, retrying in 15 seconds.&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+                
+<div class="viewcode-block" id="State.stop"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop state object.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+    <span class="k">def</span> <span class="nf">_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Completely clear entire database.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">flushall</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="State.increment_call_id"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.increment_call_id">[docs]</a>    <span class="k">def</span> <span class="nf">increment_call_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increment call ID number, and return next available.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s">&#39;call_id&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="State.add_node"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.add_node">[docs]</a>    <span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new node to the controller.</span>
+
+<span class="sd">        Add a new node to the controller with the given details (hostname and port numbers). Set timeout according </span>
+<span class="sd">        to configuration. Return new node ID.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s">&#39;node_id&#39;</span><span class="p">)</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+        <span class="n">pipe</span><span class="o">.</span><span class="n">rpush</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">host</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pipe</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;node_timeout&#39;</span><span class="p">])</span>
+        <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">node_id</span>
+</div>
+<div class="viewcode-block" id="State.update_node"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.update_node">[docs]</a>    <span class="k">def</span> <span class="nf">update_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update a node in the controller.</span>
+
+<span class="sd">        Refresh timeout on for given node ID. Increment the number of times the controller has seen this node.</span>
+<span class="sd">        If the node has not been seen before, reset the node (which will generate a new &#39;hello&#39; message).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lindex</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+        <span class="n">pipe</span><span class="o">.</span><span class="n">lset</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span>
+        <span class="n">pipe</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;node_timeout&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_info</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;Node updated (ID : </span><span class="si">%s</span><span class="s">)&quot;</span><span class="p">)</span> <span class="o">%</span><span class="p">(</span><span class="n">node_id</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">redis</span><span class="o">.</span><span class="n">ResponseError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">print_warn</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;Node not found (ID : </span><span class="si">%s</span><span class="s">)&quot;</span><span class="p">)</span> <span class="o">%</span><span class="p">(</span><span class="n">node_id</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="State.remove_node"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a node from the controller.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s">&#39;node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="State.list_nodes"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.list_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List all nodes currently connected to the controller (or not timed out yet).&quot;&quot;&quot;</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="s">&#39;node:*&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodes</span>
+</div>
+<div class="viewcode-block" id="State.get_node_details"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.get_node_details">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_details</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given a node&#39;s ID, return it&#39;s hostname and port number.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Node</span><span class="p">()</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lindex</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lindex</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">node</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="State.add_node_expression"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.add_node_expression">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a given node to a given expression.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="State.get_expression"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.get_expression">[docs]</a>    <span class="k">def</span> <span class="nf">get_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find nodes that currently have given expression.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lrange</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="State.remove_expression"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.remove_expression">[docs]</a>    <span class="k">def</span> <span class="nf">remove_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Completely remove an expression from the controller.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="State.remove_node_expression"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.remove_node_expression">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove a given node from a given expression.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lrem</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> 
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="State.add_stat"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.add_stat">[docs]</a>    <span class="k">def</span> <span class="nf">add_stat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">avg_load</span><span class="p">,</span> <span class="n">cache_miss</span><span class="p">,</span> <span class="n">cache_miss_size</span><span class="p">,</span> <span class="n">cache_hit</span><span class="p">,</span> <span class="n">cache_hit_size</span><span class="p">,</span> <span class="n">cache_object</span><span class="p">,</span> <span class="n">cache_object_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a stat response to the database. </span>
+
+<span class="sd">        Also, update a node as we have seen a periodic response from it.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;stat:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;:node:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">pipe</span><span class="o">.</span><span class="n">rpush</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">avg_load</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_miss</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_miss_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_hit</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_hit_size</span><span class="p">),</span> 
+                <span class="nb">str</span><span class="p">(</span><span class="n">cache_object</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_object_size</span><span class="p">))</span>
+            <span class="n">pipe</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s">&#39;node_timeout&#39;</span><span class="p">])</span>
+            <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="State.get_stat"><a class="viewcode-back" href="../../../../opencache.controller.state.html#opencache.controller.state.opencacheredis.State.get_stat">[docs]</a>    <span class="k">def</span> <span class="nf">get_stat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the stats relating to a specific cache instance.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;stat:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Stat</span><span class="p">()</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="n">node_id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;node:&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">);</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">lrange</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>          
+            <span class="n">stat</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">avg_load</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_miss</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_miss_size</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_hit</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_hit_size</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_object</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">cache_object_size</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">stat</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>
