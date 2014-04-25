@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>opencache.lib.opencachelib &mdash; opencache 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="opencache 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for opencache.lib.opencachelib</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python2.7      </span>
+
+<span class="sd">&quot;&quot;&quot;opencachelib.py: Core OpenCache functionality shared between controller and node.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">httplib</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+
+<span class="n">TAG</span> <span class="o">=</span> <span class="s">&quot;lib&quot;</span>
+
+<div class="viewcode-block" id="setup_logger"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.setup_logger">[docs]</a><span class="k">def</span> <span class="nf">setup_logger</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Setup logging functionality to both console and a rotating log file.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;opencache&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">create_directory</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">RotatingFileHandler</span><span class="p">(</span><span class="n">log_path</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&quot;.log&quot;</span><span class="p">,</span> <span class="n">maxBytes</span><span class="o">=</span><span class="mi">1073741824</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">RotatingFileHandler</span><span class="p">(</span><span class="s">&#39;node.log&#39;</span><span class="p">,</span> <span class="n">maxBytes</span><span class="o">=</span><span class="mi">1073741824</span><span class="p">)</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%(asctime)s</span><span class="s">][</span><span class="si">%(levelname)s</span><span class="s">]</span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+    <span class="k">return</span> <span class="n">logger</span>
+</div>
+<div class="viewcode-block" id="create_directory"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.create_directory">[docs]</a><span class="k">def</span> <span class="nf">create_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new directory if it doesn&#39;t exist.&quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="delete_directory"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.delete_directory">[docs]</a><span class="k">def</span> <span class="nf">delete_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removed an existing directory used for storing cached content specific to this HTTP server&#39;s expression.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="expr_split"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.expr_split">[docs]</a><span class="k">def</span> <span class="nf">expr_split</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+    <span class="n">expr_split</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">expr_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">expr_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">path</span>
+</div>
+<div class="viewcode-block" id="log_debug"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.log_debug">[docs]</a><span class="k">def</span> <span class="nf">log_debug</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a formatted error message if verbosity level permits.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;opencache&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;[&quot;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">&quot;] &quot;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="log_info"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.log_info">[docs]</a><span class="k">def</span> <span class="nf">log_info</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a formatted information message if verbosity level permits.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;opencache&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;[&quot;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">&quot;] &quot;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="log_warn"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.log_warn">[docs]</a><span class="k">def</span> <span class="nf">log_warn</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a formatted warning message if verbosity level permits.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;opencache&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;[&quot;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">&quot;] &quot;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="log_error"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.log_error">[docs]</a><span class="k">def</span> <span class="nf">log_error</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a formatted error message if verbosity level permits.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;opencache&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">verbosity</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;[&quot;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">&quot;] &quot;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="load_config"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.load_config">[docs]</a><span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load configuration settings from the configuration file&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="s">&#39;config&#39;</span><span class="p">):</span>
+        <span class="n">config</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">config</span>
+</div>
+<div class="viewcode-block" id="do_json_rpc_post"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.do_json_rpc_post">[docs]</a><span class="k">def</span> <span class="nf">do_json_rpc_post</span><span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">_input</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Format JSON request as JSON-RPC with HTTP POST.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_input</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">post_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="n">_id</span><span class="p">,</span> <span class="s">&quot;method&quot;</span><span class="p">:</span><span class="n">method</span><span class="p">,</span> <span class="s">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="s">&quot;2.0&quot;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">do_json_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">post_data</span><span class="o">=</span><span class="n">post_data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not encode JSON: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">post_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="n">_id</span><span class="p">,</span> <span class="s">&quot;method&quot;</span><span class="p">:</span><span class="n">method</span><span class="p">,</span> <span class="s">&quot;params&quot;</span><span class="p">:</span><span class="n">_input</span><span class="p">,</span> <span class="s">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="s">&quot;2.0&quot;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">do_json_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">post_data</span><span class="o">=</span><span class="n">post_data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not encode JSON: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="do_json_rest_post"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.do_json_rest_post">[docs]</a><span class="k">def</span> <span class="nf">do_json_rest_post</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Format JSON request as REST with HTTP POST.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">do_json_post</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">post_data</span><span class="o">=</span><span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not encode JSON: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="do_json_rest_delete"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.do_json_rest_delete">[docs]</a><span class="k">def</span> <span class="nf">do_json_rest_delete</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">_json</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Format JSON request as REST with HTTP DELETE.&quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">httplib</span><span class="o">.</span><span class="n">HTTPConnection</span><span class="p">(</span><span class="n">host</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s">&#39;DELETE&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">_json</span><span class="p">)</span> 
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">getresponse</span><span class="p">()</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">content</span>
+</div>
+<div class="viewcode-block" id="do_json_post"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.do_json_post">[docs]</a><span class="k">def</span> <span class="nf">do_json_post</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">post_data</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make a JSON call to given destination.&quot;&quot;&quot;</span>
+    <span class="n">httplib</span><span class="o">.</span><span class="n">HTTPConnection</span><span class="o">.</span><span class="n">_http_vsn</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">httplib</span><span class="o">.</span><span class="n">HTTPConnection</span><span class="o">.</span><span class="n">_http_vsn_str</span> <span class="o">=</span> <span class="s">&#39;HTTP/1.0&#39;</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span>  <span class="s">&quot;http://</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">post_data</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_data</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">response_json</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+                <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not decode JSON from response: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not connect to </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">exception</span><span class="p">))</span>
+            <span class="k">raise</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span>  <span class="s">&quot;http://</span><span class="si">%s</span><span class="s">:</span><span class="si">%s%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">post_data</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> 
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_data</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">response_json</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+                <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not decode JSON from response: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not connect: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="send_json_rpc_result"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.send_json_rpc_result">[docs]</a><span class="k">def</span> <span class="nf">send_json_rpc_result</span><span class="p">(</span><span class="n">JSONHandler</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send JSON result message in response to successful call.&quot;&quot;&quot;</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&quot;Content-type&quot;</span><span class="p">,</span> <span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="n">request_id</span><span class="p">,</span> <span class="s">&quot;result&quot;</span><span class="p">:</span><span class="n">result</span><span class="p">,</span> <span class="s">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="s">&quot;2.0&quot;</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">log_error</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span>  <span class="s">&quot;Could not encode JSON: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n\r\n</span><span class="s">&#39;</span><span class="p">)</span> 
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="send_json_rpc_error"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.send_json_rpc_error">[docs]</a><span class="k">def</span> <span class="nf">send_json_rpc_error</span><span class="p">(</span><span class="n">JSONHandler</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send JSON error message in response to failed call.&quot;&quot;&quot;</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">error</span><span class="p">[</span><span class="s">&quot;code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s">&#39;-32700&#39;</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Parse error&#39;</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s">&#39;-32600&#39;</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Invalid Request&#39;</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s">&#39;-32601&#39;</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Method not found&#39;</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s">&#39;-32602&#39;</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Invalid params&#39;</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s">&#39;-32603&#39;</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Internal error&#39;</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="n">request_id</span><span class="p">,</span> <span class="s">&quot;error&quot;</span><span class="p">:</span><span class="n">error</span><span class="p">,</span> <span class="s">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="s">&quot;2.0&quot;</span><span class="p">})</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="n">JSONHandler</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="RemoteProcedureCallError"><a class="viewcode-back" href="../../../opencache.lib.html#opencache.lib.opencachelib.RemoteProcedureCallError">[docs]</a><span class="k">class</span> <span class="nc">RemoteProcedureCallError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">opencache 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Matthew Broadbent.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>
