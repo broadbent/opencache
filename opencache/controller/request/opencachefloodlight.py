@@ -42,7 +42,7 @@ class Request:
         try:
             request_out = '{"switch": "' + dpid + '", "name":"' + node_host + '-' + node_port + '-' + expr + '-out", "cookie":"0", "priority":"32768", "active":"true", "ether-type":"2048", "vlan":"' + vlan + '", "protocol":"6", "src-ip":"' + node_host + '", "src-port":"' + node_port + '", "actions":"set-src-ip=' + expr + ',set-src-port=80,output=normal"}'
             print lib.do_json_rest_post(host=openflow_host, port=openflow_port, _json=request_out, path='/wm/staticflowentrypusher/json')
-            request_in = '{"switch": "' + dpid + '", "name":"' + node_host + '-' + node_port + '-' + expr + '-in", "cookie":"0", "priority":"32768", "active":"true", "ether-type":"2048",  "vlan":"' + vlan + '", "protocol":"6", "dst-ip":"' + expr + '", "dst-port":"80", "ingress-port":"' + port + '", actions":"set-dst-ip=' + node_host + ',set-dst-port=' + node_port + ',output=' + port + '"}'
+            request_in = '{"switch": "' + dpid + '", "name":"' + node_host + '-' + node_port + '-' + expr + '-in", "cookie":"0", "priority":"32768", "active":"true", "ether-type":"2048",  "vlan":"' + vlan + '", "protocol":"6", "dst-ip":"' + expr + '", "dst-port":"80", "ingress-port":"' + port + '", "actions":"set-dst-ip=' + node_host + ',set-dst-port=' + node_port + ',output=' + port + '"}'
             print lib.do_json_rest_post(host=openflow_host, port=openflow_port, _json=request_in, path='/wm/staticflowentrypusher/json')
         except Exception as e:
             self._controller.print_error(TAG, "Could not add redirect with Floodlight controller: " + str(e))
