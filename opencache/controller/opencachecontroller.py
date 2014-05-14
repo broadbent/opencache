@@ -417,12 +417,10 @@ class Notification():
         """Handle a redirect message. Either add the redirect or remove it, depending on the message."""
         if notification['params']['action'] == 'add':
             self._controller._request_handling.add_redirect(str(notification['params']['expr']), str(notification['params']['host']),
-                str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']),
-                str(self._controller.config['switch_dpid']), str(self._controller.config['vlan_id']))
+                str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
         elif notification['params']['action'] == 'remove':
             self._controller._request_handling.remove_redirect(str(notification['params']['expr']), str(notification['params']['host']),
-                str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']),
-                str(self._controller.config['switch_dpid']), str(self._controller.config['vlan_id']))
+                str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
 
     def _handle_stat_message(self, notification):
         """Handle a stat message. Add this data to the database."""

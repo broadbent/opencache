@@ -25,7 +25,7 @@ class Request:
         """Stop redirection object."""
         pass
 
-    def add_redirect(self, expr, node_host, node_port, openflow_host, openflow_port, _, _):
+    def add_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
         """Add a redirect for content requests matching given expression to given node."""
         port = ''
         dpid = ''
@@ -47,7 +47,7 @@ class Request:
         except Exception as e:
             self._controller.print_error(TAG, "Could not add redirect with Floodlight controller: " + str(e))
 
-    def remove_redirect(self, expr, node_host, node_port, openflow_host, openflow_port, switch_dpid, vlan_id):
+    def remove_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
         """Remove a redirect for content requests matching given expression to given node."""
         try:
             request_out = '{"name":"' + node_host + '-' + node_port + '-' + expr + '-out"}'
