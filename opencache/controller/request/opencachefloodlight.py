@@ -33,9 +33,9 @@ class Request:
         try:
             url = 'http://' + openflow_host + ':' + openflow_port + '/wm/device/?ipv4=' + node_host
             response = json.loads(urllib2.urlopen(url).read())
-            port = response[0]['attachmentPoint'][0]['port']
-            dpid = response[0]['attachmentPoint'][0]['switchDPID']
-            vlan = response[0]['vlan'][0]
+            port = str(response[0]['attachmentPoint'][0]['port'])
+            dpid = str(response[0]['attachmentPoint'][0]['switchDPID'])
+            vlan = str(response[0]['vlan'][0])
         except Exception as e:
             self._controller.print_error(TAG, "Could not retrieve node attachment point from Floodlight: " + str(e))
         print port, dpid, vlan
