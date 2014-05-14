@@ -40,7 +40,7 @@ class Controller():
         self.config = lib.load_config(self.config, parser)
         self._logger = lib.setup_logger(self.config["log_path"], TAG, self.config["verbosity"])
         self._state = state.State(self, self.config)
-        self._request_handling = request_handling.Request(self, self.config)
+        self._request_handling = request_handling.Request(self)
         self._api = api.Api(self, self.config)
         self._notification = Notification(self)
         self._notification.listen()
