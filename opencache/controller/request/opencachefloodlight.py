@@ -27,19 +27,18 @@ class Request:
 
     def add_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
         """Add a redirect for content requests matching given expression to given node."""
-        port = ''
-        dpid = ''
-        vlan = ''
         try:
             url = 'http://' + openflow_host + ':' + openflow_port + '/wm/device/?ipv4=' + node_host
             response = json.loads(urllib2.urlopen(url).read())
+        except Exception as e:
+            self._controller.print_error(TAG, "Could not retrieve node attachment point from Floodlight: " + str(e))
+        try:
             port = str(response[0]['attachmentPoint'][0]['port'])
             dpid = str(response[0]['attachmentPoint'][0]['switchDPID'])
             vlan = str(response[0]['vlan'][0])
             mac = str(response[0]['mac'][0])
-        except Exception as e:
-            self._controller.print_error(TAG, "Could not retrieve node attachment point from Floodlight: " + str(e))
-        print port, dpid, vlan
+        except KeyError as e:
+            self._controller.print_error(TAG, "Key missing in node attachment point lookup in Floodlight: " + str(e))
         try:
             request_out = '{"switch": "' + dpid + '", "name":"' + node_host + '-' + node_port + '-' + expr + '-out", "cookie":"0", "priority":"32768", "active":"true", "ether-type":"2048", "vlan":"' + vlan + '", "protocol":"6", "src-mac":"' + mac + '", "src-ip":"' + node_host + '", "src-port":"' + node_port + '", "actions":"set-src-ip=' + expr + ',set-src-port=80,output=normal"}'
             print lib.do_json_rest_post(host=openflow_host, port=openflow_port, _json=request_out, path='/wm/staticflowentrypusher/json')

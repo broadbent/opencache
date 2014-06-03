@@ -23,7 +23,7 @@ class State:
         while (database_test == None):
             try:
                 self._client = pymongo.MongoClient(self._node.config['database_host'], int(self._node.config['database_port']))
-                self._database = self._client.opencache
+                self._database = self._client[self._node.config['database_name']]
                 database_test = self._database.command("serverStatus")
             except Exception as e:
                 self._node.print_warn(TAG, "Could not connect to MongoDB database, retrying in 15 seconds.")

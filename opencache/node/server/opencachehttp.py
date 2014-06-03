@@ -45,7 +45,8 @@ class Server:
         self._load_data = collections.deque(maxlen=int(self._node.config["stat_refresh"]))
         self._set_path(expr)
         lib.create_directory(self._server_path)
-        self._server = self.ThreadedHTTPServer((self._node.config["node_host"], self._port), self.HandlerClass)
+        self._server = self.ThreadedHTTPServer(('', self._port), self.HandlerClass)
+        #self._server = self.ThreadedHTTPServer((self._node.config["node_host"], self._port), self.HandlerClass)
         self._server._setup_signal_handling()
         self._server._server = self
         self._server._node = self._node
