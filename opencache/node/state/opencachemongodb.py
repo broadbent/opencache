@@ -26,7 +26,7 @@ class State:
                 self._database = self._client[self._node.config['database_name']]
                 database_test = self._database.command("serverStatus")
             except Exception as e:
-                self._node.print_warn(TAG, "Could not connect to MongoDB database, retrying in 15 seconds: " + e)
+                self._node.print_warn(TAG, "Could not connect to MongoDB database, retrying in 15 seconds: " + str(e))
                 time.sleep(15)
 
     def create(self, document):
