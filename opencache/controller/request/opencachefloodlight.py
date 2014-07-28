@@ -118,6 +118,6 @@ class Request:
 
     def remove_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
         """Remove a redirect for content requests matching given expression to given node."""
-        pusher = self.Floodlight(openflow_host, openflow_port)
+        pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
         pusher.remove({"name":"request_out-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_in-" + node_host + "-" + node_port + "-" + expr})
