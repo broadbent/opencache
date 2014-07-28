@@ -68,7 +68,7 @@ class Request:
             path = '/wm/device/?ipv4=' + data
             conn = httplib.HTTPConnection(self.host, self.port)
             conn.request('GET', path)
-            response = json.loads(conn.getresponse())
+            response = json.loads(conn.getresponse().read())
             port = str(response[0]['attachmentPoint'][0]['port'])
             dpid = str(response[0]['attachmentPoint'][0]['switchDPID'])
             mac = str(response[0]['mac'][0])
