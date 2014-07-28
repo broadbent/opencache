@@ -93,7 +93,7 @@ class Request:
         #   "dst-mac":"f2:1b:62:db:17:bd",
             "dst-port":"80",
             "active":"true",
-            "actions":"set-dst-mac=72:25:c2:7c:38:fe,set-dst-ip=" + node_host +
+            "actions":"set-dst-mac=" + node_mac + ",set-dst-ip=" + node_host +
                 ",set-dst-port=" + node_port +",output=normal"
         }
         request_out = {
