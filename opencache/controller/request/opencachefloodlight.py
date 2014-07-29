@@ -28,22 +28,27 @@ class Request:
     class StaticFlowEntryPusher:
 
         def __init__(self, host, port):
+            """Initialise object with hostname and port of Floodlight controller."""
             self.host = host
             self.port = port
 
         def get(self, data):
+            """Send HTTP GET request to Floodlight API."""
             ret = self._rest_call({}, 'GET')
             return json.loads(ret[2])
 
         def set(self, data):
+            """Send HTTP POST request to Floodlight API."""
             ret = self._rest_call(data, 'POST')
             return ret[0] == 200
 
         def remove(self,data):
+            """Send HTTP DELETE request to Floodlight API."""
             ret = self._rest_call(data, 'DELETE')
             return ret[0] == 200
 
         def _rest_call(self, data, action):
+            """Send REST call to Floodlight controller's Static Flowpusher API."""
             path = '/wm/staticflowentrypusher/json'
             headers = {
                 'Content-type': 'application/json',
@@ -54,78 +59,84 @@ class Request:
             conn.request(action, path, body, headers)
             response = conn.getresponse()
             ret = (response.status, response.reason, response.read())
-            print ret
             conn.close()
             return ret
 
     class Device:
 
         def __init__(self, host, port):
+            """Initialise object with hostname and port of Floodlight controller."""
             self.host = host
             self.port = port
 
         def get(self, data):
+            """Send HTTP GET request to Floodlight API."""
+            ret = self._rest_call(data, 'GET')
+            result = json.loads(ret[2])
+            if result != {}:
+                port = str(result[0]['attachmentPoint'][0]['port'])
+                dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
+                mac = str(result[0]['mac'][0])
+                return (port, dpid, mac)
+            else:
+                raise KeyError
+
+
+        def _rest_call(self, data, action):
+            """Send REST call to Floodlight controller's Device API."""
             path = '/wm/device/?ipv4=' + data
             conn = httplib.HTTPConnection(self.host, self.port)
             conn.request('GET', path)
-            response = json.loads(conn.getresponse().read())
-            port = str(response[0]['attachmentPoint'][0]['port'])
-            dpid = str(response[0]['attachmentPoint'][0]['switchDPID'])
-            mac = str(response[0]['mac'][0])
-            return (port, dpid, mac)
-
+            response = conn.getresponse().read()
+            ret = (response.status, response.reason, response.read())
+            conn.close()
+            return ret
 
     def add_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
-        """Add a redirect for content requests matching given expression to given node."""
+        """Add a redirect for content requests matching given expression to a given node."""
         pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
         device = self.Device(openflow_host, openflow_port)
-        (_, connected_dpid, node_mac) = device.get(node_host)
-        # rule per port
+        try:
+            (_, connected_dpid, node_mac) = device.get(node_host)
+        except KeyError:
+            raise
         request_hands_off = {
-            "switch":connected_dpid,
-            "name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr,
-            "cookie":"0",
-            "priority":"32767",
-            "ether-type":0x0800,# 0x800 x8100 all vald id packets
-            "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
-            "src-ip":node_host,
-            "src-mac":node_mac,
-            "dst-ip":expr,
-        #   "dst-mac":"f2:1b:62:db:17:bd",
+            "switch": connected_dpid,
+            "name": "request_hands_off-" + node_host + "-" + node_port + "-" + expr,
+            "priority": "32767",
+            "ether-type": 0x0800,
+            "protocol": 0x06,
+            "src-ip": node_host,
+            "src-mac": node_mac,
+            "dst-ip": expr,
             "dst-port":"80",
             "active":"true",
             "actions":"output=normal"
         }
         request_in = {
-            "switch":connected_dpid,
-            "name":"request_in-" + node_host + "-" + node_port + "-" + expr,
-            "cookie":"0",
-            "priority":"32766",
-            "ether-type":0x0800,# 0x800 x8100 all vald id packets
-            "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
-        #    "src-ip":"10.0.0.4",
-        #    "src-mac":"2a:5a:bc:e9:30:a2",
-            "dst-ip":expr,
-        #   "dst-mac":"f2:1b:62:db:17:bd",
-            "dst-port":"80",
-            "active":"true",
-            "actions":"set-dst-mac=" + node_mac + ",set-dst-ip=" + node_host +
+            "switch": connected_dpid,
+            "name": "request_in-" + node_host + "-" + node_port + "-" + expr,
+            "priority": "32766",
+            "ether-type": 0x0800,
+            "protocol": 0x06,
+            "dst-ip": expr,
+            "dst-port": "80",
+            "active": "true",
+            "actions": "set-dst-mac=" + node_mac + ",set-dst-ip=" + node_host +
                 ",set-dst-port=" + node_port +",output=normal"
         }
         request_out = {
-            "switch":connected_dpid,
-            "name":"request_out-" + node_host + "-" + node_port + "-" + expr,
-            "cookie":"0",
-            "priority":"32766",
-            "ether-type":0x0800,# 0x800 x8100 all vald id packets
-            "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
-            "src-ip":node_host,
-            "src-mac":node_mac,
-        #    "dst-ip":"10.0.0.4",
-        #    "dst-mac":"2a:5a:bc:e9:30:a2",
-            "src-port":node_port,
-            "active":"true",
-            "actions":"set-src-port=80,set-src-ip=" + expr + ",output=normal"
+            "switch": connected_dpid,
+            "name": "request_out-" + node_host + "-" + node_port + "-" + expr,
+            "cookie": "0",
+            "priority": "32766",
+            "ether-type": 0x0800,
+            "protocol": 0x06,
+            "src-ip": node_host,
+            "src-mac": node_mac,
+            "src-port": node_port,
+            "active": "true",
+            "actions": "set-src-port=80,set-src-ip=" + expr + ",output=normal"
         }
         pusher.remove({"name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_out-" + node_host + "-" + node_port + "-" + expr})
@@ -137,5 +148,6 @@ class Request:
     def remove_redirect(self, expr, node_host, node_port, openflow_host, openflow_port):
         """Remove a redirect for content requests matching given expression to given node."""
         pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
+        pusher.remove({"name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_out-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_in-" + node_host + "-" + node_port + "-" + expr})

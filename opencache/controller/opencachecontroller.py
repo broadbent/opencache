@@ -416,8 +416,11 @@ class Notification():
     def _handle_redir_message(self, notification):
         """Handle a redirect message. Either add the redirect or remove it, depending on the message."""
         if notification['params']['action'] == 'add':
-            self._controller._request_handling.add_redirect(str(notification['params']['expr']), str(notification['params']['host']),
-                str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
+            try:
+                self._controller._request_handling.add_redirect(str(notification['params']['expr']), str(notification['params']['host']),
+                    str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
+            except KeyError:
+                self.print_error(TAG, 'Could not add redirect, device attachment point not found.')
         elif notification['params']['action'] == 'remove':
             self._controller._request_handling.remove_redirect(str(notification['params']['expr']), str(notification['params']['host']),
                 str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
