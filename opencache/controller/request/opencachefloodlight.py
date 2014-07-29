@@ -80,11 +80,27 @@ class Request:
         pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
         device = self.Device(openflow_host, openflow_port)
         (_, connected_dpid, node_mac) = device.get(node_host)
+        # rule per port
+        request_hands_off = {
+            "switch":connected_dpid,
+            "name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr,
+            "cookie":"0",
+            "priority":"32767",
+            "ether-type":0x0800,# 0x800 x8100 all vald id packets
+            "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
+            "src-ip":node_host,
+            "src-mac":node_mac,
+            "dst-ip":expr,
+        #   "dst-mac":"f2:1b:62:db:17:bd",
+            "dst-port":"80",
+            "active":"true",
+            "actions":"output=normal"
+        }
         request_in = {
-            'switch':connected_dpid,
+            "switch":connected_dpid,
             "name":"request_in-" + node_host + "-" + node_port + "-" + expr,
             "cookie":"0",
-            "priority":"32768",
+            "priority":"32766",
             "ether-type":0x0800,# 0x800 x8100 all vald id packets
             "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
         #    "src-ip":"10.0.0.4",
@@ -97,10 +113,10 @@ class Request:
                 ",set-dst-port=" + node_port +",output=normal"
         }
         request_out = {
-            'switch':connected_dpid,
+            "switch":connected_dpid,
             "name":"request_out-" + node_host + "-" + node_port + "-" + expr,
             "cookie":"0",
-            "priority":"32768",
+            "priority":"32766",
             "ether-type":0x0800,# 0x800 x8100 all vald id packets
             "protocol":0x06, #TCP 0x06, ICMP 0x01 UDP 0x11
             "src-ip":node_host,
@@ -111,8 +127,10 @@ class Request:
             "active":"true",
             "actions":"set-src-port=80,set-src-ip=" + expr + ",output=normal"
         }
+        pusher.remove({"name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_out-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_in-" + node_host + "-" + node_port + "-" + expr})
+        pusher.set(request_hands_off)
         pusher.set(request_out)
         pusher.set(request_in)
 
