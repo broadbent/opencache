@@ -73,10 +73,10 @@ class State:
 
     def increment_call_id(self):
         """Increment call ID number, and return next available."""
-        return self._database.counters.find_and_modify( query={ 'name' : 'call_id' },  update={ '$inc' : { 'count': 1 } }, upsert=True, multi=False)['count']
+        return self._database.counters.find_and_modify( query={ 'name' : 'call_id' },  update={ '$inc' : { 'count': 1 } }, upsert=True, multi=False, new=True)['count']
 
     def increment_node_id(self):
-        return self._database.counters.find_and_modify( query={ 'name' : 'node_id' },  update={ '$inc' : { 'count': 1 } }, upsert=True, multi=False)['count']
+        return self._database.counters.find_and_modify( query={ 'name' : 'node_id' },  update={ '$inc' : { 'count': 1 } }, upsert=True, multi=False, new=True)['count']
 
     def add_node(self, host, port):
         """Add a new node to the controller.
