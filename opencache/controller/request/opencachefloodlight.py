@@ -87,7 +87,7 @@ class Request:
             path = '/wm/device/?ipv4=' + data
             conn = httplib.HTTPConnection(self.host, self.port)
             conn.request('GET', path)
-            response = conn.getresponse().read()
+            response = conn.getresponse()
             ret = (response.status, response.reason, response.read())
             conn.close()
             return ret
