@@ -26,6 +26,7 @@ class Request:
         pass
 
     class StaticFlowEntryPusher:
+        """Represents calls made to the Floodlight's Static Flowpusher API."""
 
         def __init__(self, host, port):
             """Initialise object with hostname and port of Floodlight controller."""
@@ -63,6 +64,7 @@ class Request:
             return ret
 
     class Device:
+        """Represents calls made to the Floodlight's Device API."""
 
         def __init__(self, host, port):
             """Initialise object with hostname and port of Floodlight controller."""
@@ -80,7 +82,6 @@ class Request:
                 return (port, dpid, mac)
             else:
                 raise KeyError
-
 
         def _rest_call(self, data, action):
             """Send REST call to Floodlight controller's Device API."""

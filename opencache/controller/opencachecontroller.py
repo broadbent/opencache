@@ -427,7 +427,6 @@ class Notification():
 
     def _handle_stat_message(self, notification):
         """Handle a stat message. Add this data to the database."""
-        print notification['params']['expr']
         self._controller._state.add_stat(notification['params']['expr'], notification['params']['node_id'], notification['params']['status'],
             notification['params']['avg_load'], notification['params']['cache_miss'], notification['params']['cache_miss_size'],
             notification['params']['cache_hit'], notification['params']['cache_hit_size'],  notification['params']['cache_object'],
