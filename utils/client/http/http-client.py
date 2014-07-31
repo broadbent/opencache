@@ -6,6 +6,8 @@ import httplib
 import time
 import sys
 import socket
+import signal
+import os
 
 myList=['/one.txt', '/two.txt', '/three.txt']
 
@@ -16,6 +18,11 @@ try:
 except (IndexError, socket.error):
     print 'provide a valid IP address'
     sys.exit(2)
+
+def hard_exit(signum, frame):
+    os.kill(os.getpid(), signal.SIGKILL)
+
+signal.signal(signal.SIGINT, hard_exit)
 
 while True:
     for e in myList:
@@ -31,4 +38,4 @@ while True:
             conn.close()
             time.sleep(1)
         except:
-        pass
+            pass
