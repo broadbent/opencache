@@ -41,11 +41,3 @@ Fully implement regex like expressions. Consider rule clashes.
 ### Node Labelling ###
 
 Label and classify nodes (a la Puppet), so that they can be addressed as a group.
-
-### Fix ###
-
-Before next release:
-
-* Listen on IP 0.0.0.0 by default
-* Finish MongoDB migration 
-* Check OpenFlow functionality
