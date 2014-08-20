@@ -76,9 +76,13 @@ class Request:
             ret = self._rest_call(data, 'GET')
             result = json.loads(ret[2])
             if result != {}:
-                port = str(result[0]['attachmentPoint'][0]['port'])
-                dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
-                mac = str(result[0]['mac'][0])
+                print result
+                try:
+                    port = str(result[0]['attachmentPoint'][0]['port'])
+                    dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
+                    mac = str(result[0]['mac'][0])
+                except IndexError:
+                    raise
                 try:
                     vlan = str(result[0]['vlan'][0])
                 except:
