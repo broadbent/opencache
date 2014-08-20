@@ -420,7 +420,7 @@ class Notification():
                 self._controller._request_handling.add_redirect(str(notification['params']['expr']), str(notification['params']['host']),
                     str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
             except KeyError:
-                self.print_error(TAG, 'Could not add redirect, device attachment point not found.')
+                self._controller.print_error(TAG, 'Could not add redirect, device attachment point not found.')
         elif notification['params']['action'] == 'remove':
             self._controller._request_handling.remove_redirect(str(notification['params']['expr']), str(notification['params']['host']),
                 str(notification['params']['port']), str(self._controller.config['openflow_host']), str(self._controller.config['openflow_port']))
