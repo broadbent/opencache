@@ -79,7 +79,11 @@ class Request:
                 port = str(result[0]['attachmentPoint'][0]['port'])
                 dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
                 mac = str(result[0]['mac'][0])
-                return (port, dpid, mac)
+                try:
+                    vlan = str(result[0]['vlan'][0])
+                except:
+                    vlan = '-1'
+                return (port, dpid, mac, vlan)
             else:
                 raise KeyError
 
@@ -98,7 +102,7 @@ class Request:
         pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
         device = self.Device(openflow_host, openflow_port)
         try:
-            (_, connected_dpid, node_mac) = device.get(node_host)
+            (_, connected_dpid, node_mac, node_vlan) = device.get(node_host)
         except KeyError:
             raise
         request_hands_off = {
@@ -111,6 +115,7 @@ class Request:
             "src-mac": node_mac,
             "dst-ip": expr,
             "dst-port":"80",
+            "vlan-id":node_vlan,
             "active":"true",
             "actions":"output=normal"
         }
@@ -122,6 +127,7 @@ class Request:
             "protocol": 0x06,
             "dst-ip": expr,
             "dst-port": "80",
+            "vlan-id":node_vlan,
             "active": "true",
             "actions": "set-dst-mac=" + node_mac + ",set-dst-ip=" + node_host +
                 ",set-dst-port=" + node_port +",output=normal"
@@ -136,6 +142,7 @@ class Request:
             "src-ip": node_host,
             "src-mac": node_mac,
             "src-port": node_port,
+            "vlan-id":node_vlan,
             "active": "true",
             "actions": "set-src-port=80,set-src-ip=" + expr + ",output=normal"
         }
