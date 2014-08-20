@@ -75,8 +75,7 @@ class Request:
             """Send HTTP GET request to Floodlight API."""
             ret = self._rest_call(data, 'GET')
             result = json.loads(ret[2])
-            if result != {}:
-                print result
+            if result != []:
                 try:
                     port = str(result[0]['attachmentPoint'][0]['port'])
                     dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
