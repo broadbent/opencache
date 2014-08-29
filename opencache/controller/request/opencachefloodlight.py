@@ -5,6 +5,7 @@
 import opencache.lib.opencachelib as lib
 import httplib
 import json
+import os
 
 TAG = 'request'
 
@@ -75,18 +76,11 @@ class Request:
             """Send HTTP GET request to Floodlight API."""
             ret = self._rest_call(data, 'GET')
             result = json.loads(ret[2])
-            if result != []:
-                try:
-                    port = str(result[0]['attachmentPoint'][0]['port'])
-                    dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
-                    mac = str(result[0]['mac'][0])
-                except IndexError:
-                    raise
-                try:
-                    vlan = str(result[0]['vlan'][0])
-                except:
-                    vlan = '-1'
-                return (port, dpid, mac, vlan)
+            if result != {}:
+                port = str(result[0]['attachmentPoint'][0]['port'])
+                dpid = str(result[0]['attachmentPoint'][0]['switchDPID'])
+                mac = str(result[0]['mac'][0])
+                return (port, dpid, mac)
             else:
                 raise KeyError
 
@@ -104,51 +98,69 @@ class Request:
         """Add a redirect for content requests matching given expression to a given node."""
         pusher = self.StaticFlowEntryPusher(openflow_host, openflow_port)
         device = self.Device(openflow_host, openflow_port)
-        try:
-            (_, connected_dpid, node_mac, node_vlan) = device.get(node_host)
-        except KeyError:
-            raise
+        if os.system("ping -c1 -q "+node_host) == 0:
+            try:
+                (node_ovsport, connected_dpid, node_mac) = device.get(node_host)
+            except KeyError:
+                 raise
+        else:
+             print "Cannot retrive information from the controller for host:"+node_host
+
+        if os.system("ping -c1 -q "+expr) == 0:
+            try:
+                (expr_ovsport,_,_) = device.get(expr)
+            except KeyError:
+                raise
+        else:
+              print "Cannot retrive information from the controller for host:"+expr
+
         request_hands_off = {
             "switch": connected_dpid,
             "name": "request_hands_off-" + node_host + "-" + node_port + "-" + expr,
-            "priority": "32767",
+            "priority": "1000",
             "ether-type": 0x0800,
+            "vlan-id":"1000",
             "protocol": 0x06,
+            "ingress-port":node_ovsport,
             "src-ip": node_host,
             "src-mac": node_mac,
             "dst-ip": expr,
             "dst-port":"80",
-            "vlan-id":node_vlan,
             "active":"true",
-            "actions":"output=normal"
+            "actions":"output=flood"
+            #"actions":"output=normal"
         }
         request_in = {
             "switch": connected_dpid,
             "name": "request_in-" + node_host + "-" + node_port + "-" + expr,
-            "priority": "32766",
+            "priority": "999",
             "ether-type": 0x0800,
+            "vlan-id":"1000",
             "protocol": 0x06,
             "dst-ip": expr,
             "dst-port": "80",
-            "vlan-id":node_vlan,
             "active": "true",
             "actions": "set-dst-mac=" + node_mac + ",set-dst-ip=" + node_host +
-                ",set-dst-port=" + node_port +",output=normal"
+                ",set-dst-port=" + node_port +",output="+node_ovsport
         }
         request_out = {
             "switch": connected_dpid,
             "name": "request_out-" + node_host + "-" + node_port + "-" + expr,
             "cookie": "0",
-            "priority": "32766",
+            "priority": "999",
             "ether-type": 0x0800,
+            "vlan-id":"1000",
             "protocol": 0x06,
+            "ingress-port":node_ovsport,
             "src-ip": node_host,
             "src-mac": node_mac,
             "src-port": node_port,
-            "vlan-id":node_vlan,
             "active": "true",
-            "actions": "set-src-port=80,set-src-ip=" + expr + ",output=normal"
+            "actions": "set-src-port=80,set-src-ip=" + expr + ",output=flood"
         }
+        print "request_hands_off"+str(request_hands_off)
+        print "request_in"+str(request_in)
+        print "request_out"+str(request_out)
         pusher.remove({"name":"request_hands_off-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_out-" + node_host + "-" + node_port + "-" + expr})
         pusher.remove({"name":"request_in-" + node_host + "-" + node_port + "-" + expr})
