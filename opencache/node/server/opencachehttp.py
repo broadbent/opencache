@@ -249,11 +249,12 @@ class Server:
             """
             while True:
                 if self._stop != True:
-                    print 'handle'
                     self.handle_request()
                     self._load += 1
 
     class HandlerClass(BaseHTTPServer.BaseHTTPRequestHandler):
+
+        protocol_version = 'HTTP/1.1'
 
         def log_message( self, format, *args ):
             """Ignore log messages."""
@@ -349,6 +350,7 @@ class Server:
             length = int(response.getheader('content-length'))
             self.send_response(200)
             self.send_header('Content-type','text-html')
+            self.send_header('Content-length', length)
             self.end_headers()
             total_payload = ""
             bytes_read = 0
@@ -367,7 +369,6 @@ class Server:
                 bytes_read += 1448
                 if bytes_read > length:
                     break
-            self.wfile.close()
             connection.close()
             self.server._node.print_debug(TAG, 'cache fetched: %s%s at approx. %s bytes' %(url, self.path, bytes_read))
             return total_payload
