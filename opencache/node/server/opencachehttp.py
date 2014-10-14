@@ -309,25 +309,25 @@ class Server:
             cache requests. Statistics updated accordingly.
 
             """
-            try:
-                self.server._node.print_debug(TAG, 'cache miss: %s%s' %(self.server._expr, self.path))
-                remote_object = self._fetch_and_send_object(self.server._expr)
-                if self._disk_check():
-                    lookup = self.server._server._database.lookup({'key' : key})
-                    if len(lookup) == 1:
-                        object_path = lookup[0]['path']
-                    else:
-                        object_path = self.server._server_path + "/" + key
+            self.server._node.print_debug(TAG, 'cache miss: %s%s' %(self.server._expr, self.path))
+            remote_object = self._fetch_and_send_object(self.server._expr)
+            if self._disk_check():
+                lookup = self.server._server._database.lookup({'key' : key})
+                if len(lookup) == 1:
+                    object_path = lookup[0]['path']
+                else:
+                    object_path = self.server._server_path + "/" + key
+                try:
                     f = open(object_path, 'w')
                     f.write(remote_object)
                     f.close()
                     self.server._server._database.create({'expr' : self.server._expr, 'key' : key, 'path' : object_path})
-                else:
-                    self.server._node.print_info(TAG, 'Cache instance has reached maximum disk usage and cannot store object: %s%s' %(self.server._expr, self.path))
-                self.server._cache_miss += 1
-                self.server._cache_miss_size += sys.getsizeof(remote_object)
-            except Exception as e:
-                pass
+                except (IOError, OSError) as e:
+                    self.server._node.print_warn(TAG, ('Could not save content to filesystem: %s' % e))
+            else:
+                self.server._node.print_info(TAG, 'Cache instance has reached maximum disk usage and cannot store object: %s%s' %(self.server._expr, self.path))
+            self.server._cache_miss += 1
+            self.server._cache_miss_size += sys.getsizeof(remote_object)
 
         def _disk_check(self):
             """Check if it possible to write a given object to disk.
@@ -377,6 +377,7 @@ class Server:
             """Deliver the cached object to the client"""
             self.send_response(200)
             self.send_header('Content-type','text-html')
+            self.send_header('Content-length', len(data))
             self.end_headers()
             try:
                 self.wfile.write(data)
