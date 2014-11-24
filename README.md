@@ -1,12 +1,12 @@
 # OpenCache #
 
-OpenCache is an experimental HTTP caching platform that utilises [OpenFlow-enabled](https://www.opennetworking.org/sdn-resources/onf-specifications/openflow) switches to provide transparent content delivery. It works in a controller-node architecture, described in the [Architecture](https://github.com/broadbent/opencache#architecture) section. 
+OpenCache is an experimental HTTP caching platform that utilises [OpenFlow-enabled](https://www.opennetworking.org/sdn-resources/onf-specifications/openflow) switches to provide transparent content delivery. It works in a controller-node architecture, described in the [Architecture](https://github.com/broadbent/opencache#architecture) section.
 
 Progress is quickly advancing, with a number of features to be implemented shortly (see [TODO](https://github.com/broadbent/opencache/TODO.md) for more details).
 
 ## Requirements ##
 
-OpenCache is written for Python 2.7 and is tested on Unix platforms. It is recommended that `pip` is used to automatically install OpenCache and any additional dependencies. 
+OpenCache is written for Python 2.7 and is tested on Unix platforms. It is recommended that `pip` is used to automatically install OpenCache and any additional dependencies.
 
 The OpenCache controller uses the [pymongo](https://pypi.python.org/pypi/pymongo/) library to interact with a [MongoDB](http://www.mongodb.org/) database. [pyzmq](https://github.com/zeromq/pyzmq) is required for internal ØMQ messaging. Backported from Python 3.2+ to Python 2.6-2.7, [configparser](https://pypi.python.org/pypi/configparser) is also used for allowing additional flexibility in configuration files.
 
@@ -42,7 +42,7 @@ $ python setup.py install
 
 ## Running OpenCache ##
 
-OpenCache is split into two parts: the controller and the node. See the [Architecture](https://github.com/broadbent/opencache/README.md#architecture) section for more details. 
+OpenCache is split into two parts: the controller and the node. See the [Architecture](https://github.com/broadbent/opencache/README.md#architecture) section for more details.
 
 To run the OpenCache controller, simply use:
 ```bash
@@ -78,13 +78,13 @@ The following RPCs are used to interact with a an OpenCache deployment via a con
 
 | method                  | params                                          | result                            |
 |-------------------------|-------------------------------------------------|-----------------------------------|
-| `start`                 | `{ ("expr" : <expr>), ("node" : <node>) }`   	| `<boolean>`                       |
-| `stop`                  | `{ ("expr" : <expr>), ("node" : <node>) }`   	| `<boolean>`                       |
-| `pause`                 | `{ ("expr" : <expr>), ("node" : <node>) }`   	| `<boolean>`                       |
-| `fetch`                 | `{ ("expr" : <expr>), ("node" : <node>) }`  	| `<boolean>`                       |
-| `seed`                  | `{ ("expr" : <expr>), ("node" : <node>) }`  	| `<boolean>`                       |
-| `refresh`               | `{ ("expr" : <expr>), ("node" : <node>) }`  	| `<boolean>`                       |
-| `stat`                  | `{ ("expr" : <expr>), ("node" : <node>) }`  	| `[<cache_hit>, <cache_miss>... ]` |
+| `start`                 | `{ ("expr" : <expr>), ("node-id" : <node>) }`   	| `<boolean>`                       |
+| `stop`                  | `{ ("expr" : <expr>), ("node-id" : <node>) }`   	| `<boolean>`                       |
+| `pause`                 | `{ ("expr" : <expr>), ("node-id" : <node>) }`   	| `<boolean>`                       |
+| `fetch`                 | `{ ("expr" : <expr>), ("node-id" : <node>) }`  	| `<boolean>`                       |
+| `seed`                  | `{ ("expr" : <expr>), ("node-id" : <node>) }`  	| `<boolean>`                       |
+| `refresh`               | `{ ("expr" : <expr>), ("node-id" : <node>) }`  	| `<boolean>`                       |
+| `stat`                  | `{ ("expr" : <expr>), ("node-id" : <node>) }`  	| `[<cache_hit>, <cache_miss>... ]` |
 
 
 Parameters in brackets are optional. If not included, a wildcard all (`*`) is used. A `<node>` can be either a single node, a vertical-bar-seperated (`|`) list of nodes or a wildcard (`*`) for all existing nodes. An `<expr>` can either be a single OpenCache expression, a vertical-bar-seperated (`|`) list of OpenCache expressions or a wildcard (`*`) to cache all HTTP traffic.
